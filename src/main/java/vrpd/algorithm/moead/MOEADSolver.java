@@ -6,6 +6,8 @@ import vrpd.algorithm.model.Evaluator;
 
 import java.util.*;
 
+import static vrpd.algorithm.model.Evaluator.applyNormalization;
+
 /**
  * MOEADSolver - classical MOEA/D implementation for VRPD (permutation + drone mask)
  *
@@ -62,7 +64,7 @@ public class MOEADSolver {
         this.maxGens = maxGens;
         this.numTrucks = numTrucks;
         this.customers = customers;
-        this.rnd = new Random(seed);
+        this.rnd = new Random();
         this.T = Math.max(2, (int) Math.round(popSize * 0.1));
         this.delta = 0.9;
         initWeights();
@@ -119,9 +121,9 @@ public class MOEADSolver {
             }
 
             // return EP (Pareto approximation)
-            return new ArrayList<>(externalPop);
+            return new ArrayList<>(applyNormalization(externalPop));
         } catch (OutOfMemoryError e) {
-            return new ArrayList<>(externalPop);
+            return new ArrayList<>(applyNormalization(externalPop));
         }
     }
 

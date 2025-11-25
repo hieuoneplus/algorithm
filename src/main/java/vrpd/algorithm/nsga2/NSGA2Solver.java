@@ -6,6 +6,8 @@ import vrpd.algorithm.model.Solution;
 
 import java.util.*;
 
+import static vrpd.algorithm.model.Evaluator.applyNormalization;
+
 public class NSGA2Solver {
     private int popSize, gens;
     private Map<Integer, Customer> customers;
@@ -43,9 +45,9 @@ public class NSGA2Solver {
                 // NSGA-II cho drone ở đây
                 pop = optimizeDroneAssignment(pop, 1);
             }
-            return getParetoFront(pop);
+            return applyNormalization(getParetoFront(pop));
         } catch (OutOfMemoryError e) {
-            return getParetoFront(pop);
+            return applyNormalization(getParetoFront(pop));
         }
 
 

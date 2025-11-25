@@ -6,6 +6,8 @@ import vrpd.algorithm.model.Solution;
 
 import java.util.*;
 
+import static vrpd.algorithm.model.Evaluator.applyNormalization;
+
 /**
  * MOTLBO solver for VRPD (Multi-Objective Teaching-Learning-Based Optimization)
  *
@@ -68,7 +70,7 @@ public class MOTLBOSolver {
         this.maxGens = maxGens;
         this.numTrucks = numTrucks;
         this.customers = customers;
-        this.rnd = new Random(seed);
+        this.rnd = new Random();
         this.archiveMax = popSize;
         this.nCustomers = (int) customers.keySet().stream().filter(id -> id != 0).count();
     }
@@ -169,9 +171,9 @@ public class MOTLBOSolver {
                 // generation done
             }
             // return archive copy
-            return new ArrayList<>(archive);
+            return new ArrayList<>(applyNormalization(archive));
         } catch (OutOfMemoryError e) {
-            return new ArrayList<>(archive);
+            return new ArrayList<>(applyNormalization(archive));
         }
     }
 

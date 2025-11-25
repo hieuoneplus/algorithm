@@ -39,6 +39,8 @@ public class Evaluator {
     // small penalty for infeasible (when we want to sort but keep numeric)
     public static double INFEASIBLE_PENALTY = 1e6;
 
+
+
     /**
      * Optional: set parameters before running MOEA/D.
      */
@@ -304,4 +306,35 @@ public class Evaluator {
         }
         return 0.0;
     }
+
+    // ====== NEW: scale về [0,1] ======
+    public static List<Solution> applyNormalization(List<Solution> sol) {
+        var smax = sol.stream().max(Comparator.comparing(Solution::getMakespan)).orElseThrow().makespan;
+        var smin = sol.stream().min(Comparator.comparing(Solution::getMakespan)).orElseThrow().makespan;
+
+        var cmax = sol.stream().max(Comparator.comparing(Solution::getCarbonEmission)).orElseThrow().carbonEmission;
+        var cmin = sol.stream().min(Comparator.comparing(Solution::getCarbonEmission)).orElseThrow().carbonEmission;
+
+        sol.forEach(pt -> {
+            double nMake, nEmi;
+            if (smax == smin) {
+                nMake = 0;
+            } else {
+                nMake = (pt.makespan - smin) /
+                        (smax - smin);
+            }
+
+            if (cmax == cmin) {
+                nEmi = 0;
+            } else {
+                nEmi = (pt.carbonEmission - cmin) /
+                        (cmax - cmin);
+            }
+
+            pt.makespan = nMake;
+            pt.carbonEmission = nEmi;
+        });
+        return sol;
+    }
+
 }

@@ -5,6 +5,8 @@ import vrpd.algorithm.model.Solution;
 import vrpd.algorithm.model.Customer;
 import java.util.*;
 
+import static vrpd.algorithm.model.Evaluator.applyNormalization;
+
 /**
  * MODESolver - Multi-Objective Differential Evolution for VRPD
  *
@@ -50,7 +52,7 @@ public class MODESolver {
         this.maxGens = maxGens;
         this.numTrucks = numTrucks;
         this.customers = customers;
-        this.rnd = new Random(seed);
+        this.rnd = new Random();
         // count customers excluding depot 0
         this.nCustomers = (int) customers.keySet().stream().filter(id -> id != 0).count();
         this.archiveMax = popSize;
@@ -118,10 +120,10 @@ public class MODESolver {
                 }
             }
         } catch (OutOfMemoryError e) {
-            return new ArrayList<>(archive);
+            return new ArrayList<>(applyNormalization(archive));
         }
         // return archive copy
-        return new ArrayList<>(archive);
+        return new ArrayList<>(applyNormalization(archive));
     }
 
     /* --------------------------

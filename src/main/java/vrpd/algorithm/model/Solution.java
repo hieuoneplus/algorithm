@@ -3,7 +3,7 @@ package vrpd.algorithm.model;
 import lombok.Data;
 
 import java.util.*;
-
+@Data
 public class Solution {
     public List<List<Integer>> truckRoutes = new ArrayList<>();
     public Set<Integer> droneCustomers = new HashSet<>();

@@ -6,13 +6,16 @@ import org.knowm.xchart.XYChartBuilder;
 import org.knowm.xchart.XYSeries;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import vrpd.algorithm.model.Customer;
+import vrpd.algorithm.model.Evaluator;
 import vrpd.algorithm.model.Solution;
 import vrpd.algorithm.motlbo.MOTLBOSolver;
 import vrpd.algorithm.nsga2.NSGA2Solver;
+import vrpd.algorithm.util.CommonService;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.*;
 
 @SpringBootApplication
@@ -20,17 +23,27 @@ public class MotlboVrpd {
     public static void main(String[] args) throws Exception {
 //        Map<Integer, Customer> customers = loadCustomers("src/data/customers.csv");
 
-        Map<Integer, Customer> customers = loadCustomersV2("src/data/cus_1.csv");
+        Map<Integer, Customer> customers = loadCustomersV2("src/data/h100c101.csv");
         MOTLBOSolver solver = new MOTLBOSolver(50, 100000000, 4, customers, 42L);
         List<Solution> pareto = solver.run();
         pareto.forEach(s -> System.out.println(
                 "Makespan=" + s.makespan + ", CO2=" + s.carbonEmission + ", truck route: " + s.truckRoutes.toString()
                         + "\n" + ",drone route:" + NSGA2Solver.getDroneGen(s).toString()
         ));
-        System.out.println("HV: " + calculateHypervolume(pareto));
-        drawImg(pareto);
+        System.out.println("HV: " + CommonService.calculateHypervolume(pareto));
+        CommonService.drawImg(pareto, "MOTLBO");
     }
 
+    public static List<Solution> run(String cusPath) throws IOException {
+        if(Evaluator.TOTAL_EVAL == 0) {
+            Evaluator.TOTAL_EVAL = 50000;
+        }
+        Map<Integer, Customer> customers = loadCustomersV2(cusPath);
+        MOTLBOSolver solver = new MOTLBOSolver(50, 100000000, 4, customers, 42L);
+        return solver.run();
+//        DecimalFormat df = new DecimalFormat("#,###.##");
+//        return df.format(CommonService.calculateHypervolume(pareto));
+    }
     private static Map<Integer, Customer> loadCustomers(String path) throws IOException {
         Map<Integer, Customer> map = new HashMap<>();
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
@@ -64,67 +77,5 @@ public class MotlboVrpd {
             }
         }
         return map;
-    }
-    public static double calculateHypervolume(List<Solution> pareto) {
-        if (pareto == null || pareto.isEmpty()) return 0.0;
-
-        // 1. tìm điểm tham chiếu r = (max f1, max f2)
-        double maxMakespan = Double.NEGATIVE_INFINITY;
-        double maxCarbon = Double.NEGATIVE_INFINITY;
-        for (Solution s : pareto) {
-            maxMakespan = Math.max(maxMakespan, s.makespan);
-            maxCarbon = Math.max(maxCarbon, s.carbonEmission);
-        }
-        double ref1 = 0.0;
-        double ref2 = 0.0;
-        double[] referencePoint = {ref1, ref2};
-        // 2. sắp xếp tập nghiệm theo f1 (makespan) tăng dần
-        List<Solution> sorted = new ArrayList<>(pareto);
-        sorted.sort(Comparator.comparingDouble(s -> s.makespan));
-
-        double hypervolume = 0.0;
-        double prevFb = referencePoint[1];
-        for (int i=0;i<sorted.size();i++) {
-            var ind = sorted.get(i);
-            if(i != sorted.size()-1) {
-                var indLbPre = sorted.get(i+1);
-                double leng = Math.abs(indLbPre.makespan - ind.makespan);
-                double width = Math.abs(prevFb - ind.carbonEmission);
-                hypervolume += leng*width;
-            } else {
-                double leng = Math.abs(prevFb - ind.makespan);
-                double width = Math.abs(prevFb - ind.carbonEmission);
-                hypervolume += leng*width;
-            }
-        }
-        return Math.round(hypervolume*100.0)/100.0;
-    }
-
-    public static void drawImg(List<Solution> pareto) {
-        XYChart chart = new XYChartBuilder().width(800).height(600).title("Pareto Motlbo").xAxisTitle("CO2").yAxisTitle("Makespan").build();
-        chart.getStyler().setDefaultSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Scatter);
-
-        int rank = 0;
-
-        List<Double> Lb = new ArrayList<>();
-        List<Double> ratio = new ArrayList<>();
-        draw(pareto, Lb, ratio);
-
-        // Thêm dữ liệu vào biểu đồ
-
-        // Nếu không phải lần lặp đầu tiên, nối điểm hiện tại với điểm trước đó
-        chart.addSeries("Rank " + rank, ratio, Lb);//.setXYSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Line);
-
-
-        new SwingWrapper<>(chart).displayChart();
-
-    }
-    public static void draw(List<Solution> list, List<Double> Lb, List<Double> ratio) {
-        for(int i=0; i<list.size();i++) {
-
-            Lb.add(Math.round(list.get(i).makespan * 1000.0) / 1000.0);
-            ratio.add(Math.round(list.get(i).carbonEmission * 1000.0) / 1000.0);
-
-        }
     }
 }
