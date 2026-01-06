@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.*;
 
+import static vrpd.algorithm.util.CommonService.loadCustomersV2;
+
 @SpringBootApplication
 public class NsgaIIVrpd {
 
@@ -60,24 +62,6 @@ public class NsgaIIVrpd {
 				int d = Integer.parseInt(t[3]);
 				double tws = Double.parseDouble(t[4]), twe = Double.parseDouble(t[5]);
 				map.put(id, new Customer(id,x,y,d,tws,twe));
-			}
-		}
-		return map;
-	}
-	private static Map<Integer, Customer> loadCustomersV2(String path) throws IOException {
-		Map<Integer, Customer> map = new HashMap<>();
-		try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-			String line;
-			int id = 0;
-			while ((line = br.readLine())!=null) {
-				if (line.startsWith("x")) continue;
-				String[] t = line.split(",");
-
-				double x = Double.parseDouble(t[0]), y = Double.parseDouble(t[1]);
-				double d = Double.parseDouble(t[2]);
-				double tws = Double.parseDouble(t[3]), twe = Double.parseDouble(t[4]);
-				map.put(id, new Customer(id,x,y,d,tws,twe));
-				id++;
 			}
 		}
 		return map;

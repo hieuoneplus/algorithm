@@ -48,9 +48,9 @@ public class Solution {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Solution{makespan=").append(makespan)
-                .append(", carbon=").append(carbonEmission)
-                .append(", S=").append(serviceLevel)
+        sb.append("Solution{makespan=").append(String.format("%.3f", makespan))
+                .append(", carbon=").append(String.format("%.3f", carbonEmission))
+                .append(", ServiceLevel=").append(String.format("%.3f", serviceLevel))
                 .append(", feasible=").append(feasible)
                 .append(", routes=");
         for (List<Integer> r : truckRoutes) {

@@ -18,19 +18,22 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.*;
 
+import static vrpd.algorithm.util.CommonService.loadCustomersV2;
+
 @SpringBootApplication
 public class MoeadVrpd {
 
     public static void main(String[] args) throws Exception {
 //        Map<Integer, Customer> customers = loadCustomers("src/data/customers.csv");
 
-        Map<Integer, Customer> customers = loadCustomersV2("src/data/h100c101.csv");
+        Map<Integer, Customer> customers = loadCustomersV2("src/data/h100r102.csv");
         MOEADSolver solver = new MOEADSolver(50, 100000000, 4, customers, 42L);
         List<Solution> pareto = solver.run();
-        pareto.forEach(s -> System.out.println(
-                "Makespan=" + s.makespan + ", CO2=" + s.carbonEmission + ", truck route: " + s.truckRoutes.toString()
-                        + "\n" + ",drone route:" + NSGA2Solver.getDroneGen(s).toString()
-        ));
+        System.out.println(CommonService.printPA(pareto));
+//        pareto.forEach(s -> System.out.println(
+//                "Makespan=" + s.makespan + ", CO2=" + s.carbonEmission + ", truck route: " + s.truckRoutes.toString()
+//                        + "\n" + ",drone route:" + NSGA2Solver.getDroneGen(s).toString()
+//        ));
         System.out.println("HV: " + CommonService.calculateHypervolume(pareto));
         CommonService.drawImg(pareto, "MOEAD");
     }
@@ -57,24 +60,6 @@ public class MoeadVrpd {
                 int d = Integer.parseInt(t[3]);
                 double tws = Double.parseDouble(t[4]), twe = Double.parseDouble(t[5]);
                 map.put(id, new Customer(id,x,y,d,tws,twe));
-            }
-        }
-        return map;
-    }
-    private static Map<Integer, Customer> loadCustomersV2(String path) throws IOException {
-        Map<Integer, Customer> map = new HashMap<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-            String line;
-            int id = 0;
-            while ((line = br.readLine())!=null) {
-                if (line.startsWith("x")) continue;
-                String[] t = line.split(",");
-
-                double x = Double.parseDouble(t[0]), y = Double.parseDouble(t[1]);
-                double d = Double.parseDouble(t[2]);
-                double tws = Double.parseDouble(t[3]), twe = Double.parseDouble(t[4]);
-                map.put(id, new Customer(id,x,y,d,tws,twe));
-                id++;
             }
         }
         return map;

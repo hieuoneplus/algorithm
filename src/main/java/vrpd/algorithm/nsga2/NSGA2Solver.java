@@ -274,6 +274,7 @@ public class NSGA2Solver {
 
             // gán drone tốt nhất vào truckSol
             Solution best = getParetoFront(dronePop).get(0).cloneSolution(); // lấy front tốt nhất
+            repairSolution(best);
             popAbsolute.add(best);
 //            truckSol.droneCustomers = new HashSet<>(best.droneCustomers);
 //            truckSol.makespan = best.makespan;
@@ -441,5 +442,27 @@ public class NSGA2Solver {
             }
         }
         return rs;
+    }
+    private void repairSolution(Solution sol) {
+        if (sol.droneCustomers == null || sol.truckRoutes == null) return;
+        sol.droneCustomers.removeIf(
+                cusId -> !customers.get(cusId).droneServe
+        );
+        for (List<Integer> route : sol.truckRoutes) {
+            boolean prevIsDrone = false;
+            for (int idx = 1; idx < route.size() - 1; idx++) {
+                int cid = route.get(idx);
+                if (sol.droneCustomers.contains(cid)) {
+                    if (prevIsDrone) {
+                        sol.droneCustomers.remove(cid);
+                        prevIsDrone = false;
+                    } else {
+                        prevIsDrone = true;
+                    }
+                } else {
+                    prevIsDrone = false;
+                }
+            }
+        }
     }
 }

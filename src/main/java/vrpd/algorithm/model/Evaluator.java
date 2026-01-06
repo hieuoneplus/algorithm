@@ -2,6 +2,7 @@ package vrpd.algorithm.model;
 
 import vrpd.algorithm.model.Customer;
 import vrpd.algorithm.model.Solution;
+import vrpd.algorithm.util.CommonService;
 
 import java.util.*;
 

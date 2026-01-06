@@ -234,6 +234,9 @@ public class MODESolver {
      */
     private void repairSolution(Solution sol) {
         if (sol.droneCustomers == null || sol.truckRoutes == null) return;
+        sol.droneCustomers.removeIf(
+                cusId -> !customers.get(cusId).droneServe
+        );
         for (List<Integer> route : sol.truckRoutes) {
             boolean prevIsDrone = false;
             for (int idx = 1; idx < route.size() - 1; idx++) {

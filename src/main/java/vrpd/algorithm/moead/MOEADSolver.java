@@ -183,7 +183,7 @@ public class MOEADSolver {
                     int cid = route.get(idx);
                     // random choose drone for this customer with small prob,
                     // but prevent adjacency in same route
-                    if (!prevWasDrone && rnd.nextDouble() < 0.25) {
+                    if (customers.get(cid).droneServe && !prevWasDrone && rnd.nextDouble() < 0.35) {
                         droneSet.add(cid);
                         prevWasDrone = true;
                     } else prevWasDrone = false;
@@ -351,6 +351,9 @@ public class MOEADSolver {
        ------------------------- */
     private void enforceNoAdjacentDrones(Solution sol) {
         if (sol == null || sol.truckRoutes == null || sol.droneCustomers == null) return;
+        sol.droneCustomers.removeIf(
+                cusId -> !customers.get(cusId).droneServe
+        );
         for (List<Integer> route : sol.truckRoutes) {
             boolean prevIsDrone = false;
             for (int idx = 1; idx < route.size() - 1; idx++) {

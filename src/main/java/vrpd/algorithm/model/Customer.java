@@ -7,7 +7,7 @@ public class Customer {
     public double twStart, twEnd;
     public double earliness;  // EET_i
     public double lateness;   // ELT_i
-    public boolean droneEligible;
+    public boolean droneServe;
     public double service;    // service time s_i (minutes)
 
     public Customer(int id, double x, double y, double demand, double twStart, double twEnd) {
@@ -19,11 +19,20 @@ public class Customer {
         this.twEnd = twEnd;
     }
 
+    public Customer(int id, double x, double y, double demand, double twStart, double twEnd, boolean droneServe) {
+        this.id = id;
+        this.x = x;
+        this.y = y;
+        this.demand = demand;
+        this.twStart = twStart;
+        this.twEnd = twEnd;
+        this.droneServe = droneServe;
+    }
     public Customer(int id, double x, double y,
                     int demand, double service,
                     double twStart, double twEnd,
                     double earliness, double lateness,
-                    boolean droneEligible) {
+                    boolean droneServe) {
         this.id = id;
         this.x = x;
         this.y = y;
@@ -33,7 +42,7 @@ public class Customer {
         this.twEnd = twEnd;
         this.earliness = earliness;
         this.lateness = lateness;
-        this.droneEligible = droneEligible;
+        this.droneServe = droneServe;
     }
 
     public double distanceTo(Customer other) {
