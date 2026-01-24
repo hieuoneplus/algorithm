@@ -1,5 +1,6 @@
 package vrpd.algorithm.moead;
 
+import vrpd.algorithm.model.CountGeneration;
 import vrpd.algorithm.model.Solution;
 import vrpd.algorithm.model.Customer;
 import vrpd.algorithm.model.Evaluator;
@@ -75,7 +76,7 @@ public class MOEADSolver {
        Main entry
        ------------------------- */
     public List<Solution> run() {
-
+        int l = 0;
         externalPop = new ArrayList<>();
         try {
             initPopulation();
@@ -83,6 +84,7 @@ public class MOEADSolver {
             for (Solution s : population) updateExternalPopulation(s);
 
             for (int gen = 0; gen < maxGens; gen++) {
+                l = gen;
                 for (int i = 0; i < popSize; i++) {
                     // 1) choose mating pool (2 parents) either from neighborhood or whole population
                     List<Integer> parentsIdx = chooseMatingPool(i);
@@ -121,8 +123,10 @@ public class MOEADSolver {
             }
 
             // return EP (Pareto approximation)
+            CountGeneration.MOEAD = l;
             return new ArrayList<>(applyNormalization(externalPop));
         } catch (OutOfMemoryError e) {
+            CountGeneration.MOEAD = l;
             return new ArrayList<>(applyNormalization(externalPop));
         }
     }

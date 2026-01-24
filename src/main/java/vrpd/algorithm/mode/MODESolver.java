@@ -1,5 +1,6 @@
 package vrpd.algorithm.mode;
 
+import vrpd.algorithm.model.CountGeneration;
 import vrpd.algorithm.model.Evaluator;
 import vrpd.algorithm.model.Solution;
 import vrpd.algorithm.model.Customer;
@@ -70,12 +71,14 @@ public class MODESolver {
      */
     public List<Solution> run() {
         archive = new ArrayList<>();
+        int l = 0;
         try {
             initPopulation();
             for (Solution s : populationS) updateArchive(s);
 
             // main loop
             for (int gen = 0; gen < maxGens; gen++) {
+                l = gen;
                 for (int i = 0; i < popSize; i++) {
                     // mutation (rand/1)
                     int r1, r2, r3;
@@ -120,9 +123,11 @@ public class MODESolver {
                 }
             }
         } catch (OutOfMemoryError e) {
+            CountGeneration.MODE = l;
             return new ArrayList<>(applyNormalization(archive));
         }
         // return archive copy
+        CountGeneration.MODE = l;
         return new ArrayList<>(applyNormalization(archive));
     }
 

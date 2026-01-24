@@ -1,5 +1,6 @@
 package vrpd.algorithm.motlbo;
 
+import vrpd.algorithm.model.CountGeneration;
 import vrpd.algorithm.model.Customer;
 import vrpd.algorithm.model.Evaluator;
 import vrpd.algorithm.model.Solution;
@@ -86,12 +87,14 @@ public class MOTLBOSolver {
     public List<Solution> run() {
 
         archive = new ArrayList<>();
+        int l = 0;
         try {
             initPopulation();
 
             for (Solution s : populationS) updateArchive(s);
 
             for (int gen = 0; gen < maxGens; gen++) {
+                l = gen;
                 // compute population mean (on real vector encoding) for teacher phase
                 double[] mean = computePopulationMean(populationX);
 
@@ -171,8 +174,10 @@ public class MOTLBOSolver {
                 // generation done
             }
             // return archive copy
+            CountGeneration.MOTLBO = l;
             return new ArrayList<>(applyNormalization(archive));
         } catch (OutOfMemoryError e) {
+            CountGeneration.MOTLBO = l;
             return new ArrayList<>(applyNormalization(archive));
         }
     }

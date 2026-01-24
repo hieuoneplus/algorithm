@@ -25,7 +25,7 @@ public class MotlboVrpd {
     public static void main(String[] args) throws Exception {
 //        Map<Integer, Customer> customers = loadCustomers("src/data/customers.csv");
 
-        Map<Integer, Customer> customers = loadCustomersV2("src/data/h100c101.csv");
+        Map<Integer, Customer> customers = loadCustomersV2("src/data/h100r102.csv");
         MOTLBOSolver solver = new MOTLBOSolver(50, 100000000, 4, customers, 42L);
         List<Solution> pareto = solver.run();
         pareto.forEach(s -> System.out.println(

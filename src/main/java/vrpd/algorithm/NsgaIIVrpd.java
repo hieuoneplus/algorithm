@@ -25,7 +25,7 @@ public class NsgaIIVrpd {
 	public static void main(String[] args) throws Exception {
 //		        Map<Integer, Customer> customers = loadCustomers("src/data/customers.csv");
 
-		Map<Integer, Customer> customers = loadCustomersV2("src/data/h100c101.csv");
+		Map<Integer, Customer> customers = loadCustomersV2("src/data/h100r102.csv");
 		NSGA2Solver solver = new NSGA2Solver(50, 10000000, 4, customers);
 
 		List<Solution> pareto = solver.run();

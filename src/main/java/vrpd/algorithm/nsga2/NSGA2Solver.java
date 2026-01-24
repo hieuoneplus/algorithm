@@ -1,5 +1,6 @@
 package vrpd.algorithm.nsga2;
 
+import vrpd.algorithm.model.CountGeneration;
 import vrpd.algorithm.model.Customer;
 import vrpd.algorithm.model.Evaluator;
 import vrpd.algorithm.model.Solution;
@@ -24,9 +25,11 @@ public class NSGA2Solver {
 
     public List<Solution> run() {
         List<Solution> pop = initialize();
+        int l = 0;
         try {
             pop.forEach(s -> Evaluator.evaluate(s, customers));
             for (int g = 0; g < gens; g++) {
+                l = g;
                 List<Solution> off = new ArrayList<>();
                 while (off.size() < popSize) {
                     Solution p1 = tournament(pop);
@@ -45,8 +48,10 @@ public class NSGA2Solver {
                 // NSGA-II cho drone ở đây
                 pop = optimizeDroneAssignment(pop, 1);
             }
+            CountGeneration.NSGA_II = l;
             return applyNormalization(getParetoFront(pop));
         } catch (OutOfMemoryError e) {
+            CountGeneration.NSGA_II = l;
             return applyNormalization(getParetoFront(pop));
         }
 
