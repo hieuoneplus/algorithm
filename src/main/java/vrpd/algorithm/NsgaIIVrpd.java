@@ -39,10 +39,10 @@ public class NsgaIIVrpd {
 	}
 	public static List<Solution> run(String cusPath) throws IOException {
 		if(Evaluator.TOTAL_EVAL == 0) {
-			Evaluator.TOTAL_EVAL = 50000;
+			Evaluator.TOTAL_EVAL = Evaluator.TOTAL_EVAL_DF;
 		}
 		Map<Integer, Customer> customers = loadCustomersV2(cusPath);
-		NSGA2Solver solver = new NSGA2Solver(50, 10000000, 4, customers);
+		NSGA2Solver solver = new NSGA2Solver(100, 10000000, 20, customers);
 		return solver.run();
 //		DecimalFormat df = new DecimalFormat("#,###.##");
 //		return df.format(calculateHypervolume(pareto));

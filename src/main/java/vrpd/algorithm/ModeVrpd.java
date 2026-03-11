@@ -37,10 +37,10 @@ public class ModeVrpd {
     }
     public static List<Solution> run(String cusPath) throws IOException {
         if(Evaluator.TOTAL_EVAL == 0) {
-            Evaluator.TOTAL_EVAL = 50000;
+            Evaluator.TOTAL_EVAL = Evaluator.TOTAL_EVAL_DF;
         }
         Map<Integer, Customer> customers = loadCustomersV2(cusPath);
-        MODESolver solver = new MODESolver(50, 100000000, 4, customers, 42L);
+        MODESolver solver = new MODESolver(100, 100000000, 20, customers, 42L);
         return solver.run();
     }
 

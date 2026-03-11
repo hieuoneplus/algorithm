@@ -20,7 +20,8 @@ import java.util.*;
 public class Evaluator {
 
     // --- default parameters (you can override with setParameters) ---
-    public static int TOTAL_EVAL = 50000;
+    public static int TOTAL_EVAL_DF = 100000;
+    public static int TOTAL_EVAL = 100000;
     public static double truckCapacity = 1300.0; // default, override
     public static double droneCapacity = 10.0; // default, override
     public static double truckSpeed = 35.0; // distance units per minute

@@ -11,10 +11,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static vrpd.algorithm.util.CMetric.computePairwiseCoverage;
 import static vrpd.algorithm.util.CommonService.*;
@@ -22,11 +22,11 @@ import static vrpd.algorithm.util.CommonService.*;
 public class CommonRun {
     private static DecimalFormat df = new DecimalFormat("#,###.######");
     public static void main(String[] args) throws IOException {
-        String folderPath = "src/data/100";
+        String folderPath = "src/data/400";
         File folder = new File(folderPath);
 
         // Tên file Excel sẽ lưu kết quả
-        String outExcel = "src/output/results_100_1.xlsx";
+        String outExcel = "src/output/results_400_4.xlsx";
 
         // Tạo workbook và sheet
         try (Workbook workbook = new XSSFWorkbook()) {
@@ -98,6 +98,9 @@ public class CommonRun {
                     sheetHV.autoSizeColumn(c);
                     sheetC.autoSizeColumn(c);
                     sheetPA.autoSizeColumn(c);
+                    sheetGenCount.autoSizeColumn(c);
+                    sheetRT.autoSizeColumn(c);
+                    sheetIGD.autoSizeColumn(c);
                 }
 
                 // Ghi workbook ra file
@@ -111,6 +114,8 @@ public class CommonRun {
             }
         }
     }
+
+    // --- Các hàm tạo header / ghi dữ liệu (giữ nguyên phần lớn từ code cũ) ---
 
     public static void createHeaderHV(Sheet sheet) {
         Row header = sheet.createRow(0);
@@ -157,48 +162,46 @@ public class CommonRun {
     public static void createHeaderGC(Sheet sheet) {
         Row header = sheet.createRow(0);
         header.createCell(0).setCellValue("Data");
-        header.createCell(1).setCellValue("Generation Count Moead ms");
-        header.createCell(2).setCellValue("Generation Count Mode ms");
-        header.createCell(3).setCellValue("Generation Count Motlbo ms");
-        header.createCell(4).setCellValue("Generation Count NSGA-II ms");
+        header.createCell(1).setCellValue("Generation Count Moead");
+        header.createCell(2).setCellValue("Generation Count Mode");
+        header.createCell(3).setCellValue("Generation Count Motlbo");
+        header.createCell(4).setCellValue("Generation Count NSGA-II");
     }
 
     public static void createDataHV(Map<String, List<Solution>> results, Sheet sheet, int rowIdx, File file) {
         Row row = sheet.createRow(rowIdx);
-
-        // Cột filename
         row.createCell(0).setCellValue(file.getName());
+        var MOEAD = calculateHypervolume(results.get("MOEAD"));
+        var MODE = calculateHypervolume(results.get("MODE"));
+        var MOTLBO = calculateHypervolume(results.get("MOTLBO"));
+        var NSGAII = calculateHypervolume(results.get("NSGAII"));
+        double max = Stream.of(MOEAD, MODE, MOTLBO, NSGAII)
+                .mapToDouble(Double::parseDouble)
+                .max()
+                .getAsDouble();
 
-        // Cột HV: nếu HV là số (Double), ghi trực tiếp; nếu object/array, chuyển sang String
-        writeCell(row, 1, calculateHypervolume(results.get("MOEAD")), df);
-        writeCell(row, 2, calculateHypervolume(results.get("MODE")), df);
-        writeCell(row, 3, calculateHypervolume(results.get("MOTLBO")), df);
-        writeCell(row, 4, calculateHypervolume(results.get("NSGAII")), df);
+        writeCell(row, 1, MOEAD, df, Double.parseDouble(MOEAD) == max);
+        writeCell(row, 2, MODE, df, Double.parseDouble(MODE) == max);
+        writeCell(row, 3, MOTLBO, df, Double.parseDouble(MOTLBO) == max);
+        writeCell(row, 4, NSGAII, df, Double.parseDouble(NSGAII) == max);
     }
     public static void createDataC(Map<String, List<Solution>> results, Sheet sheet, int rowIdx, File file) {
         Row row = sheet.createRow(rowIdx);
-
         var map = computePairwiseCoverage(results, true);
-        // Cột filename
         row.createCell(0).setCellValue(file.getName());
-
-        // Cột C: nếu HV là số (Double), ghi trực tiếp; nếu object/array, chuyển sang String
-        writeCell(row, 1, map.get("MOEAD").get("MODE") - map.get("MODE").get("MOEAD"), df);
-        writeCell(row, 2, map.get("MOEAD").get("MOTLBO") - map.get("MOTLBO").get("MOEAD"), df);
-        writeCell(row, 3, map.get("MOEAD").get("NSGAII") - map.get("NSGAII").get("MOEAD"), df);
+        writeCell(row, 1, map.get("MOEAD").get("MODE") - map.get("MODE").get("MOEAD"), df, false);
+        writeCell(row, 2, map.get("MOEAD").get("MOTLBO") - map.get("MOTLBO").get("MOEAD"), df, false);
+        writeCell(row, 3, map.get("MOEAD").get("NSGAII") - map.get("NSGAII").get("MOEAD"), df, false);
     }
     public static void createDataPA(Map<String, List<Solution>> results, Sheet sheet, int rowIdx, File file) {
         Row row = sheet.createRow(rowIdx);
-
         row.createCell(0).setCellValue(file.getName());
+        writeCell(row, 1, results.get("MOEAD").size(), df, false);
+        writeCell(row, 2, results.get("MODE").size(), df, false);
+        writeCell(row, 3, results.get("MOTLBO").size(), df, false);
+        writeCell(row, 4, results.get("NSGAII").size(), df, false);
 
-        // Ghi số lượng nghiệm Pareto vào Excel
-        writeCell(row, 1, results.get("MOEAD").size(), df);
-        writeCell(row, 2, results.get("MODE").size(), df);
-        writeCell(row, 3, results.get("MOTLBO").size(), df);
-        writeCell(row, 4, results.get("NSGAII").size(), df);
-
-        // Ghi PA chi tiết ra file txt
+        // Ghi PA chi tiết ra file txt (thực hiện tuần tự trong bước ghi)
         writePAtoTxt(results.get("MOEAD"), "MOEAD", file);
         writePAtoTxt(results.get("MODE"), "MODE", file);
         writePAtoTxt(results.get("MOTLBO"), "MOTLBO", file);
@@ -207,15 +210,20 @@ public class CommonRun {
 
     public static void createDataRT(Map<String, Double> results, Sheet sheet, int rowIdx, File file) {
         Row row = sheet.createRow(rowIdx);
-
-        // Cột filename
         row.createCell(0).setCellValue(file.getName());
+        var MOEAD = results.getOrDefault("MOEAD", 0.0);
+        var MODE = results.getOrDefault("MODE", 0.0);
+        var MOTLBO = results.getOrDefault("MOTLBO", 0.0);
+        var NSGAII = results.getOrDefault("NSGAII", 0.0);
 
-        // Cột HV: nếu HV là số (Double), ghi trực tiếp; nếu object/array, chuyển sang String
-        writeCell(row, 1, results.get("MOEAD"), df);
-        writeCell(row, 2, results.get("MODE"), df);
-        writeCell(row, 3, results.get("MOTLBO"), df);
-        writeCell(row, 4, results.get("NSGAII"), df);
+        double min = Stream.of(MOEAD, MODE, MOTLBO, NSGAII)
+                .min(Double::compare)
+                .get();
+
+        writeCell(row, 1, MOEAD, df, MOEAD == min);
+        writeCell(row, 2, MODE, df, MODE == min);
+        writeCell(row, 3, MOTLBO, df, MOTLBO == min);
+        writeCell(row, 4, NSGAII, df, NSGAII == min);
     }
 
     public static void createDataGC(Sheet sheet, int rowIdx, File file) {
@@ -225,73 +233,93 @@ public class CommonRun {
         row.createCell(0).setCellValue(file.getName());
 
         // Cột HV: nếu HV là số (Double), ghi trực tiếp; nếu object/array, chuyển sang String
-        writeCell(row, 1, CountGeneration.MOEAD, df);
-        writeCell(row, 2, CountGeneration.MODE, df);
-        writeCell(row, 3, CountGeneration.MOTLBO, df);
-        writeCell(row, 4, CountGeneration.NSGA_II, df);
+        writeCell(row, 1, CountGeneration.MOEAD, df, false);
+        writeCell(row, 2, CountGeneration.MODE, df, false);
+        writeCell(row, 3, CountGeneration.MOTLBO, df, false);
+        writeCell(row, 4, CountGeneration.NSGA_II, df, false);
     }
 
     public static void createDataIGD(Map<String, List<Solution>> results, Sheet sheet, int rowIdx, File file) {
         Row row = sheet.createRow(rowIdx);
-
-        // Cột filename
         row.createCell(0).setCellValue(file.getName());
-
         var igdMap = IGDUtil.computeIGDs(results, true);
-        writeCell(row, 1, igdMap.get("MOEAD"), df);
-        writeCell(row, 2, igdMap.get("MODE"), df);
-        writeCell(row, 3, igdMap.get("MOTLBO"), df);
-        writeCell(row, 4, igdMap.get("NSGAII"), df);
+        IGDUtil.printIGDMap(igdMap);
+        var MOEAD = igdMap.get("MOEAD");
+        var MODE = igdMap.get("MODE");
+        var MOTLBO = igdMap.get("MOTLBO");
+        var NSGAII = igdMap.get("NSGAII");
+
+        double min = Stream.of(MOEAD, MODE, MOTLBO, NSGAII)
+                .min(Double::compare)
+                .get();
+
+
+        writeCell(row, 1, MOEAD, df, MOEAD == min);
+        writeCell(row, 2, MODE, df, MODE == min);
+        writeCell(row, 3, MOTLBO, df, MOTLBO == min);
+        writeCell(row, 4, NSGAII, df, NSGAII == min);
     }
 
-    /**
-     * Hàm helper để ghi cell: nếu là Number -> ghi là numeric cell,
-     * nếu là mảng hoặc object -> gọi toString().
-     */
-    private static void writeCell(Row row, int columnIndex, Object value, DecimalFormat df) {
+    private static void writeCell(
+            Row row,
+            int columnIndex,
+            Object value,
+            DecimalFormat df,
+            boolean bold
+    ) {
         Cell cell = row.createCell(columnIndex);
+        Workbook wb = row.getSheet().getWorkbook();
 
         if (value == null) {
             cell.setCellValue("");
             return;
         }
 
-        // Nếu trả về kiểu Number (Double, Integer, Long, Float, BigDecimal ...)
+        // ===== Tạo style =====
+        CellStyle style = wb.createCellStyle();
+        Font font = wb.createFont();
+        font.setBold(bold);
+        style.setFont(font);
+
+        // ===== Number =====
         if (value instanceof Number) {
-            // ghi numeric cell
             double d = ((Number) value).doubleValue();
             cell.setCellValue(d);
 
-            // tùy chọn: set format hiển thị số (thousand separator)
-            CellStyle style = row.getSheet().getWorkbook().createCellStyle();
-            DataFormat fmt = row.getSheet().getWorkbook().createDataFormat();
+            DataFormat fmt = wb.createDataFormat();
             style.setDataFormat(fmt.getFormat("#,##0.######"));
             cell.setCellStyle(style);
             return;
         }
 
-        // Nếu là mảng (ví dụ double[] hay Double[])
+        // ===== Array =====
         if (value.getClass().isArray()) {
-            // convert to string như "[a, b, c]" hoặc join
             StringBuilder sb = new StringBuilder();
             int len = java.lang.reflect.Array.getLength(value);
             for (int i = 0; i < len; i++) {
                 Object el = java.lang.reflect.Array.get(value, i);
-                if (el instanceof Number) sb.append(df.format(((Number)el).doubleValue()));
-                else sb.append(el == null ? "" : el.toString());
+                if (el instanceof Number)
+                    sb.append(df.format(((Number) el).doubleValue()));
+                else
+                    sb.append(el == null ? "" : el.toString());
                 if (i < len - 1) sb.append(", ");
             }
             cell.setCellValue(sb.toString());
+            cell.setCellStyle(style);
             return;
         }
 
-        // Mặc định: ghi toString()
-        if (value.toString().length() > 32767) {
-            System.out.println("Too long: " + value.toString());
+        // ===== String =====
+        String str = value.toString();
+        if (str.length() > 32767) {
+            System.out.println("Too long: " + str);
+            cell.setCellValue(str.substring(0, 32767));
         } else {
-            cell.setCellValue(value.toString());
+            cell.setCellValue(str);
         }
+        cell.setCellStyle(style);
     }
+
 
     public static void writePAtoTxt(
             List<Solution> solutions,
@@ -309,7 +337,7 @@ public class CommonRun {
 
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(outFile.toFile()))) {
                 for (Solution s : solutions) {
-                    bw.write(s.toString()); // hoặc custom format
+                    bw.write(s.toString());
                     bw.newLine();
                 }
             }
@@ -317,5 +345,4 @@ public class CommonRun {
             e.printStackTrace();
         }
     }
-
 }

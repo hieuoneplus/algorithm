@@ -38,10 +38,10 @@ public class MotlboVrpd {
 
     public static List<Solution> run(String cusPath) throws IOException {
         if(Evaluator.TOTAL_EVAL == 0) {
-            Evaluator.TOTAL_EVAL = 50000;
+            Evaluator.TOTAL_EVAL = Evaluator.TOTAL_EVAL_DF;
         }
         Map<Integer, Customer> customers = loadCustomersV2(cusPath);
-        MOTLBOSolver solver = new MOTLBOSolver(50, 100000000, 4, customers, 42L);
+        MOTLBOSolver solver = new MOTLBOSolver(100, 100000000, 20, customers, 42L);
         return solver.run();
 //        DecimalFormat df = new DecimalFormat("#,###.##");
 //        return df.format(CommonService.calculateHypervolume(pareto));
