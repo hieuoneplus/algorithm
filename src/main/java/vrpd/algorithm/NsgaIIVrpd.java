@@ -42,7 +42,7 @@ public class NsgaIIVrpd {
 			Evaluator.TOTAL_EVAL = Evaluator.TOTAL_EVAL_DF;
 		}
 		Map<Integer, Customer> customers = loadCustomersV2(cusPath);
-		NSGA2Solver solver = new NSGA2Solver(100, 10000000, 20, customers);
+		NSGA2Solver solver = new NSGA2Solver(100, 10000000, 10, customers);
 		return solver.run();
 //		DecimalFormat df = new DecimalFormat("#,###.##");
 //		return df.format(calculateHypervolume(pareto));

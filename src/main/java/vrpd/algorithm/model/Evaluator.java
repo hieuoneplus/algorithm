@@ -310,28 +310,14 @@ public class Evaluator {
     }
 
     // ====== NEW: scale về [0,1] ======
-    public static List<Solution> applyNormalization(List<Solution> sol) {
-        var smax = sol.stream().max(Comparator.comparing(Solution::getMakespan)).orElseThrow().makespan;
-        var smin = sol.stream().min(Comparator.comparing(Solution::getMakespan)).orElseThrow().makespan;
-
-        var cmax = sol.stream().max(Comparator.comparing(Solution::getCarbonEmission)).orElseThrow().carbonEmission;
-        var cmin = sol.stream().min(Comparator.comparing(Solution::getCarbonEmission)).orElseThrow().carbonEmission;
+    public static List<Solution> applyNormalization(List<Solution> sol, double smax, double cmax) {
 
         sol.forEach(pt -> {
             double nMake, nEmi;
-            if (smax == smin) {
-                nMake = 0;
-            } else {
-                nMake = (pt.makespan - smin) /
-                        (smax - smin);
-            }
 
-            if (cmax == cmin) {
-                nEmi = 0;
-            } else {
-                nEmi = (pt.carbonEmission - cmin) /
-                        (cmax - cmin);
-            }
+            nMake = pt.makespan / smax;
+            nEmi = pt.carbonEmission / cmax;
+
 
             pt.makespan = nMake;
             pt.carbonEmission = nEmi;

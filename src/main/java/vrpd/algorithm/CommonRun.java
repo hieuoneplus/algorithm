@@ -3,6 +3,7 @@ package vrpd.algorithm;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import vrpd.algorithm.model.CountGeneration;
+import vrpd.algorithm.model.Evaluator;
 import vrpd.algorithm.model.Solution;
 import vrpd.algorithm.util.IGDUtil;
 
@@ -22,11 +23,11 @@ import static vrpd.algorithm.util.CommonService.*;
 public class CommonRun {
     private static DecimalFormat df = new DecimalFormat("#,###.######");
     public static void main(String[] args) throws IOException {
-        String folderPath = "src/data/400";
+        String folderPath = "src/data/200";
         File folder = new File(folderPath);
 
         // Tên file Excel sẽ lưu kết quả
-        String outExcel = "src/output/results_400_4.xlsx";
+        String outExcel = "src/output/results_200_5.xlsx";
 
         // Tạo workbook và sheet
         try (Workbook workbook = new XSSFWorkbook()) {
@@ -71,6 +72,33 @@ public class CommonRun {
                     var par4 = NsgaIIVrpd.run(Paths.get(folderPath, file.getName()).toString());
                     long end4 = System.nanoTime();
                     double timeNsgaIIMs = (end4 - start4) / 1_000_000.0;
+
+
+                    double globalMaxMakespan = Stream.of(par1, par2, par3, par4)
+                            .flatMap(List::stream)
+                            .mapToDouble(Solution::getMakespan)
+                            .max()
+                            .orElse(0);
+                    double globalMaxCarbonEmission = Stream.of(par1, par2, par3, par4)
+                            .flatMap(List::stream)
+                            .mapToDouble(Solution::getCarbonEmission)
+                            .max()
+                            .orElse(0);
+
+//                    double globalMinMakespan = Stream.of(par1, par2, par3, par4)
+//                            .flatMap(List::stream)
+//                            .mapToDouble(Solution::getMakespan)
+//                            .min()
+//                            .orElse(0);
+//                    double globalMinCarbonEmission = Stream.of(par1, par2, par3, par4)
+//                            .flatMap(List::stream)
+//                            .mapToDouble(Solution::getCarbonEmission)
+//                            .min()
+//                            .orElse(0);
+                    par1 = new ArrayList<>(Evaluator.applyNormalization(par1, globalMaxMakespan, globalMaxCarbonEmission));
+                    par2 = new ArrayList<>(Evaluator.applyNormalization(par2, globalMaxMakespan, globalMaxCarbonEmission));
+                    par3 = new ArrayList<>(Evaluator.applyNormalization(par3, globalMaxMakespan, globalMaxCarbonEmission));
+                    par4 = new ArrayList<>(Evaluator.applyNormalization(par4, globalMaxMakespan, globalMaxCarbonEmission));
 
                     Map<String, Double> rt = new LinkedHashMap<>();
                     rt.put("MOEAD", timeMoeadMs);

@@ -41,7 +41,7 @@ public class MotlboVrpd {
             Evaluator.TOTAL_EVAL = Evaluator.TOTAL_EVAL_DF;
         }
         Map<Integer, Customer> customers = loadCustomersV2(cusPath);
-        MOTLBOSolver solver = new MOTLBOSolver(100, 100000000, 20, customers, 42L);
+        MOTLBOSolver solver = new MOTLBOSolver(100, 100000000, 10, customers, 42L);
         return solver.run();
 //        DecimalFormat df = new DecimalFormat("#,###.##");
 //        return df.format(CommonService.calculateHypervolume(pareto));

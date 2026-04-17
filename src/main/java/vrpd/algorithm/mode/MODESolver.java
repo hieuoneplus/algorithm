@@ -124,11 +124,11 @@ public class MODESolver {
             }
         } catch (OutOfMemoryError e) {
             CountGeneration.MODE = l;
-            return new ArrayList<>(applyNormalization(archive));
+            return new ArrayList<>(archive);
         }
         // return archive copy
         CountGeneration.MODE = l;
-        return new ArrayList<>(applyNormalization(archive));
+        return new ArrayList<>(archive);
     }
 
     /* --------------------------

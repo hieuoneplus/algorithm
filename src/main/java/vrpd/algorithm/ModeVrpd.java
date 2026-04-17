@@ -40,7 +40,7 @@ public class ModeVrpd {
             Evaluator.TOTAL_EVAL = Evaluator.TOTAL_EVAL_DF;
         }
         Map<Integer, Customer> customers = loadCustomersV2(cusPath);
-        MODESolver solver = new MODESolver(100, 100000000, 20, customers, 42L);
+        MODESolver solver = new MODESolver(100, 100000000, 10, customers, 42L);
         return solver.run();
     }
 

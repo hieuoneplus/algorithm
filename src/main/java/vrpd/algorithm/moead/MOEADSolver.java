@@ -124,10 +124,10 @@ public class MOEADSolver {
 
             // return EP (Pareto approximation)
             CountGeneration.MOEAD = l;
-            return new ArrayList<>(applyNormalization(externalPop));
+            return new ArrayList<>(externalPop);
         } catch (OutOfMemoryError e) {
             CountGeneration.MOEAD = l;
-            return new ArrayList<>(applyNormalization(externalPop));
+            return new ArrayList<>(externalPop);
         }
     }
 

@@ -42,7 +42,7 @@ public class MoeadVrpd {
             Evaluator.TOTAL_EVAL = Evaluator.TOTAL_EVAL_DF;
         }
         Map<Integer, Customer> customers = loadCustomersV2(cusPath);
-        MOEADSolver solver = new MOEADSolver(100, 100000000, 20, customers, 42L);
+        MOEADSolver solver = new MOEADSolver(100, 100000000, 10, customers, 42L);
         return solver.run();
 //        DecimalFormat df = new DecimalFormat("#,###.##");
 //        return df.format(calculateHypervolume(pareto));

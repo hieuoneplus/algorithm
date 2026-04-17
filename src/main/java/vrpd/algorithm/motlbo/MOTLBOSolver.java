@@ -175,10 +175,10 @@ public class MOTLBOSolver {
             }
             // return archive copy
             CountGeneration.MOTLBO = l;
-            return new ArrayList<>(applyNormalization(archive));
+            return new ArrayList<>(archive);
         } catch (OutOfMemoryError e) {
             CountGeneration.MOTLBO = l;
-            return new ArrayList<>(applyNormalization(archive));
+            return new ArrayList<>(archive);
         }
     }
 

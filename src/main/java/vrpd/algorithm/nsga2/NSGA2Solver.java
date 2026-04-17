@@ -49,10 +49,10 @@ public class NSGA2Solver {
                 pop = optimizeDroneAssignment(pop, 1);
             }
             CountGeneration.NSGA_II = l;
-            return applyNormalization(getParetoFront(pop));
+            return getParetoFront(pop);
         } catch (OutOfMemoryError e) {
             CountGeneration.NSGA_II = l;
-            return applyNormalization(getParetoFront(pop));
+            return getParetoFront(pop);
         }
 
 
