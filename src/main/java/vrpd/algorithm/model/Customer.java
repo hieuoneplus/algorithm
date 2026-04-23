@@ -19,13 +19,14 @@ public class Customer {
         this.twEnd = twEnd;
     }
 
-    public Customer(int id, double x, double y, double demand, double twStart, double twEnd, boolean droneServe) {
+    public Customer(int id, double x, double y, double demand, double twStart, double twEnd, double servicetime, boolean droneServe) {
         this.id = id;
         this.x = x;
         this.y = y;
         this.demand = demand;
         this.twStart = twStart;
         this.twEnd = twEnd;
+        this.service = servicetime;
         this.droneServe = droneServe;
     }
     public Customer(int id, double x, double y,

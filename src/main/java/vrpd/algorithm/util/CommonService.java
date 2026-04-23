@@ -97,8 +97,9 @@ public class CommonService {
                 double x = Double.parseDouble(t[0]), y = Double.parseDouble(t[1]);
                 double d = Double.parseDouble(t[2]);
                 double tws = Double.parseDouble(t[3]), twe = Double.parseDouble(t[4]);
+                double servicetime = Double.parseDouble(t[5]);
                 boolean droneServe = Integer.parseInt(t[6]) == 1;
-                map.put(id, new Customer(id,x,y,d,tws,twe,droneServe));
+                map.put(id, new Customer(id,x,y,d,tws,twe,servicetime,droneServe));
                 id++;
             }
         }

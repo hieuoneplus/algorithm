@@ -27,7 +27,7 @@ public class CommonRun {
         File folder = new File(folderPath);
 
         // Tên file Excel sẽ lưu kết quả
-        String outExcel = "src/output/results_200_5.xlsx";
+        String outExcel = "src/output/results_200_1.xlsx";
 
         // Tạo workbook và sheet
         try (Workbook workbook = new XSSFWorkbook()) {
